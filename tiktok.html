@@ -1,0 +1,64 @@
+<!doctype html>
+<html lang="cs"><head><meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1">
+<title>TikTok přihlášení</title>
+<style>
+body{font-family:system-ui,sans-serif;max-width:40rem;margin:3rem auto;
+padding:0 1rem;line-height:1.6;color:#2B2118;background:#F4EEE0}
+h1{font-weight:600}
+code{display:block;background:#fff;border:1px solid #D8CFBC;padding:1rem;
+margin:1rem 0;word-break:break-all;font-size:1rem;border-radius:4px}
+button{background:#A2442C;color:#F4EEE0;border:0;padding:.6rem 1.2rem;
+font-size:1rem;border-radius:4px;cursor:pointer}
+.chyba{color:#A2442C;font-weight:600}
+.tichy{color:#6B6155;font-size:.9rem}
+</style></head><body>
+
+<h1>TikTok přihlášení</h1>
+
+<div id="obsah">
+  <p class="tichy">Načítám…</p>
+</div>
+
+<p class="tichy">Tahle stránka nic neukládá ani nikam neposílá. Kód se
+jen přečte z adresy a zobrazí, aby se dal zkopírovat do nástroje, který
+publikuje videa.</p>
+
+<script>
+// TikTok se sem po autorizaci vrati s ?code=... &scopes=... &state=...
+// Stranka je staticka, takze kod musi precist prohlizec a ukazat ho
+// k rucnimu zkopirovani. Zadny server nemame a kvuli jednomu prihlaseni
+// za rok ho stavet nebudeme.
+const p = new URLSearchParams(location.search);
+const el = document.getElementById("obsah");
+const chyba = p.get("error");
+const kod = p.get("code");
+
+if (chyba) {
+  el.innerHTML = '<p class="chyba">TikTok vrátil chybu: ' +
+    escapeHtml(chyba) + '</p><p>' +
+    escapeHtml(p.get("error_description") || "") + '</p>';
+} else if (kod) {
+  el.innerHTML =
+    '<p>Hotovo. Zkopíruj tenhle kód a vlož ho do nástroje:</p>' +
+    '<code id="kod">' + escapeHtml(kod) + '</code>' +
+    '<button onclick="zkopiruj()">Zkopírovat</button>' +
+    '<p class="tichy">Povolené oprávnění: ' +
+    escapeHtml(p.get("scopes") || "neuvedeno") + '</p>' +
+    '<p class="tichy">Kód platí jen pár minut, tak s ním neotálej.</p>';
+} else {
+  el.innerHTML = '<p>Sem se dostaneš až po přihlášení přes TikTok. ' +
+    'Zatím tu nic není.</p>';
+}
+
+function zkopiruj() {
+  navigator.clipboard.writeText(document.getElementById("kod").textContent);
+}
+
+function escapeHtml(s) {
+  return String(s).replace(/[&<>"']/g, c => ({
+    "&": "&amp;", "<": "&lt;", ">": "&gt;",
+    '"': "&quot;", "'": "&#39;"}[c]));
+}
+</script>
+</body></html>
